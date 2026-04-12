@@ -1,0 +1,9 @@
+'use client';
+
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Play, Pause, RotateCcw } from 'lucide-react';
+import { useTimerStore } from '@/lib/timer-store';
+import { useSettingsStore } from '@/lib/settings-store';
+import { formatTime } from '@/lib/format';
+import { playCompletionSound, playTickSound, playHalfwaySound, vibrate, requestWakeLock } from '@/lib/alerts';
+import { TIMER_PRESETS } from '@/lib/types';
