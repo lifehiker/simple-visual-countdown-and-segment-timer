@@ -1,12 +1,17 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { Play, Pause, RotateCcw, ChevronDown } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Play, Pause, RotateCcw, ChevronDown, Save } from 'lucide-react';
+import { v4 as uuidv4 } from 'uuid';
 import { useTimerStore } from '@/lib/timer-store';
 import { useSettingsStore } from '@/lib/settings-store';
+import { useLibraryStore } from '@/lib/library-store';
+import type { SavedTimer } from '@/lib/types';
 import { formatTime } from '@/lib/format';
 import { playCompletionSound, playTickSound, playHalfwaySound, vibrate, requestWakeLock } from '@/lib/alerts';
 import { TIMER_PRESETS } from '@/lib/types';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import { FullscreenButton } from '@/components/FullscreenButton';
 
 export default function HomePage() {
   const [showPicker, setShowPicker] = useState(false);
@@ -15,6 +20,9 @@ export default function HomePage() {
   const [pickerSeconds, setPickerSeconds] = useState(0);
   const timer = useTimerStore();
   const settings = useSettingsStore();
+  const library = useLibraryStore();
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [saveName, setSaveName] = useState('');
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const halfwayAlertedRef = useRef(false);
@@ -80,6 +88,15 @@ export default function HomePage() {
 
   const handleStart = () => { halfwayAlertedRef.current = false; timer.start(); };
   const handleReset = () => { halfwayAlertedRef.current = false; timer.reset(); };
+
+  const handleToggle = useCallback(() => {
+    if (timer.status === 'idle' && timer.totalSeconds > 0) { halfwayAlertedRef.current = false; timer.start(); }
+    else if (timer.status === 'running') { timer.pause(); }
+    else if (timer.status === 'paused') { timer.resume(); }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timer.status, timer.totalSeconds, timer.pause, timer.resume, timer.start]);
+
+  useKeyboardShortcuts({ onToggle: handleToggle, onReset: handleReset });
   const progressPercent = timer.totalSeconds > 0 ? (timer.remainingSeconds / timer.totalSeconds) * 100 : 0;
   const radius = 130;
   const circumference = 2 * Math.PI * radius;
@@ -87,6 +104,9 @@ export default function HomePage() {
   const strokeColor = isCritical ? 'var(--critical)' : isWarning ? 'var(--warning)' : 'var(--accent)';
   return (
     <div className="mx-auto max-w-lg px-4 pt-6 animate-fade-in">
+      <div className="flex justify-end mb-3">
+        <FullscreenButton />
+      </div>
       <div className="flex gap-2 overflow-x-auto pb-2 mb-6" style={{ scrollbarWidth: 'none' }}>
         {TIMER_PRESETS.map((preset) => (
           <button key={preset.seconds} onClick={() => applyPreset(preset.seconds)} className="shrink-0 px-4 py-2 text-sm font-semibold transition-all duration-200 hover:opacity-90" style={{ background: timer.totalSeconds === preset.seconds && timer.status === 'idle' ? 'var(--accent)' : 'var(--bg-card)', color: timer.totalSeconds === preset.seconds && timer.status === 'idle' ? 'white' : 'var(--text-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}>
@@ -133,8 +153,49 @@ export default function HomePage() {
           </div>
         </div>
       )}
+      {showSaveDialog && (
+        <div className="mb-6 p-4 animate-slide-up" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)' }}>
+          <p className="text-sm font-medium mb-4 text-center" style={{ color: 'var(--text-secondary)' }}>Save Timer</p>
+          <input
+            type="text"
+            placeholder={`${formatTime(timer.totalSeconds)} Timer`}
+            value={saveName}
+            onChange={(e) => setSaveName(e.target.value)}
+            className="w-full px-3 py-2 text-sm outline-none mb-3"
+            style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}
+          />
+          <div className="flex gap-2">
+            <button onClick={() => setShowSaveDialog(false)} className="flex-1 py-2.5 text-sm font-medium transition-all hover:opacity-80" style={{ background: 'var(--bg-secondary)', color: 'var(--text-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}>Cancel</button>
+            <button
+              onClick={() => {
+                const savedTimer: SavedTimer = {
+                  id: uuidv4(),
+                  name: saveName || `${formatTime(timer.totalSeconds)} Timer`,
+                  type: 'countdown',
+                  durationSeconds: timer.totalSeconds,
+                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString(),
+                };
+                const success = library.saveTimer(savedTimer, settings.isPremium);
+                if (!success) alert('Free tier limit reached. Upgrade to save more timers.');
+                setShowSaveDialog(false);
+              }}
+              className="flex-1 py-2.5 text-sm font-semibold text-white transition-all hover:opacity-90"
+              style={{ background: 'var(--accent)', borderRadius: 'var(--radius)' }}
+            >Save</button>
+          </div>
+        </div>
+      )}
       <div className="flex items-center justify-center gap-4 mb-6">
         <button onClick={handleReset} className="flex items-center justify-center w-12 h-12 rounded-full transition-all hover:opacity-80" style={{ background: 'var(--bg-card)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }} title="Reset"><RotateCcw size={20} /></button>
+        <button
+          onClick={() => { if (timer.totalSeconds > 0) { setSaveName(''); setShowSaveDialog(true); } }}
+          className="flex items-center justify-center w-8 h-8 rounded-lg transition-all hover:opacity-80"
+          style={{ background: 'var(--bg-card)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}
+          title="Save timer"
+        >
+          <Save size={16} />
+        </button>
         {timer.status === 'idle' && (<button onClick={handleStart} disabled={timer.totalSeconds === 0} className="flex items-center justify-center w-20 h-20 rounded-full text-white transition-all hover:opacity-90 disabled:opacity-30" style={{ background: 'var(--accent)' }} title="Start"><Play size={32} className="ml-1" /></button>)}
         {timer.status === 'running' && (<button onClick={timer.pause} className="flex items-center justify-center w-20 h-20 rounded-full text-white transition-all hover:opacity-90" style={{ background: 'var(--accent)' }} title="Pause"><Pause size={32} /></button>)}
         {timer.status === 'paused' && (<button onClick={timer.resume} className="flex items-center justify-center w-20 h-20 rounded-full text-white transition-all hover:opacity-90" style={{ background: 'var(--accent)' }} title="Resume"><Play size={32} className="ml-1" /></button>)}

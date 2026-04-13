@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { v4 as uuidv4 } from 'uuid';
 import { Play, Pause, RotateCcw, SkipForward, Save } from 'lucide-react';
 import { useTimerStore } from '@/lib/timer-store';
@@ -9,6 +10,7 @@ import { useLibraryStore } from '@/lib/library-store';
 import { formatTime, formatTimeCompact, getTotalDurationLabel } from '@/lib/format';
 import { playCompletionSound, playTickSound, playHalfwaySound, vibrate, requestWakeLock } from '@/lib/alerts';
 import type { IntervalPhase, IntervalSession } from '@/lib/types';
+import { FullscreenButton } from '@/components/FullscreenButton';
 
 type ViewMode = 'build' | 'run';
 
@@ -34,6 +36,25 @@ export default function IntervalsPage() {
   const library = useLibraryStore();
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    const pendingLoad = library.pendingLoad;
+    if (pendingLoad && pendingLoad.type === 'intervals' && pendingLoad.intervalSession) {
+      const s = pendingLoad.intervalSession;
+      setConfig((c) => ({
+        ...c,
+        sessionName: pendingLoad.name,
+        warmupSeconds: s.warmupSeconds,
+        workSeconds: s.workSeconds,
+        restSeconds: s.restSeconds,
+        rounds: s.rounds,
+        cooldownSeconds: s.cooldownSeconds,
+      }));
+      library.clearPendingLoad();
+      library.addRecent(pendingLoad);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function computeElapsed(ph: IntervalPhase, round: number, cfg: BuildConfig, rem: number): number {
     const total = computeTotal(cfg);
@@ -100,6 +121,23 @@ export default function IntervalsPage() {
 
   const resetSession = () => { timer.reset(); setPhase('work'); setCurrentRound(1); setTransitioning(false); setViewMode('build'); };
 
+  const handleToggle = useCallback(() => {
+    if (viewMode === 'build') {
+      if (computeTotal(config) > 0) startSession();
+    } else {
+      if (timer.status === 'running') timer.pause();
+      else if (timer.status === 'paused') timer.resume();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewMode, timer.status, config, timer.pause, timer.resume]);
+
+  const handleReset = useCallback(() => {
+    if (viewMode === 'run') resetSession();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewMode]);
+
+  useKeyboardShortcuts({ onToggle: handleToggle, onReset: handleReset });
+
   const skipPhase = () => {
     const next = getNextPhase(phase, currentRound, runConfig);
     if (!next || next.phase === 'completed') { setPhase('completed'); timer.complete(); return; }
@@ -163,6 +201,9 @@ export default function IntervalsPage() {
 
   return (
     <div className="mx-auto max-w-lg px-4 pt-6 animate-fade-in">
+      <div className="flex justify-end mb-2">
+        <FullscreenButton />
+      </div>
       <div className="text-center mb-2"><p className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>{runConfig.sessionName || 'Interval Timer'}</p></div>
       {!sessionComplete && (<div className="text-center mb-1"><span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>{phase === 'warmup' ? 'Warmup' : phase === 'cooldown' ? 'Cooldown' : 'Round ' + currentRound + ' of ' + runConfig.rounds}</span></div>)}
       <div className="text-center mb-5">

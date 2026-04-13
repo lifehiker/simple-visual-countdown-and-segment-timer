@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { v4 as uuidv4 } from 'uuid';
 import {
   Plus,
@@ -19,6 +20,7 @@ import { useLibraryStore } from '@/lib/library-store';
 import { formatTime, formatTimeCompact } from '@/lib/format';
 import { playCompletionSound, playTickSound, vibrate, requestWakeLock } from '@/lib/alerts';
 import type { SegmentItem, SegmentSession } from '@/lib/types';
+import { FullscreenButton } from '@/components/FullscreenButton';
 
 type ViewMode = 'build' | 'run';
 
@@ -39,6 +41,23 @@ export default function SegmentsPage() {
 
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    const pendingLoad = library.pendingLoad;
+    if (pendingLoad && pendingLoad.type === 'segments' && pendingLoad.segmentSession) {
+      setSessionName(pendingLoad.name);
+      setSegments(
+        pendingLoad.segmentSession.segments.map((s) => ({
+          id: s.id,
+          label: s.label,
+          durationSeconds: s.durationSeconds,
+        }))
+      );
+      library.clearPendingLoad();
+      library.addRecent(pendingLoad);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const totalDuration = segments.reduce((sum, s) => sum + s.durationSeconds, 0);
   const currentSegment = segments[currentSegmentIndex] ?? null;
@@ -112,6 +131,23 @@ export default function SegmentsPage() {
     setTransitioning(false);
     setViewMode('build');
   };
+
+  const handleToggle = useCallback(() => {
+    if (viewMode === 'build') {
+      if (segments.length > 0 && totalDuration > 0) startSession();
+    } else {
+      if (timer.status === 'running') timer.pause();
+      else if (timer.status === 'paused') timer.resume();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewMode, timer.status, segments.length, totalDuration, timer.pause, timer.resume]);
+
+  const handleReset = useCallback(() => {
+    if (viewMode === 'run') resetSession();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewMode]);
+
+  useKeyboardShortcuts({ onToggle: handleToggle, onReset: handleReset });
 
   const skipSegment = () => {
     if (currentSegmentIndex < segments.length - 1) {
@@ -274,6 +310,9 @@ export default function SegmentsPage() {
 
   return (
     <div className="mx-auto max-w-lg px-4 pt-6 animate-fade-in">
+      <div className="flex justify-end mb-2">
+        <FullscreenButton />
+      </div>
       <div className="text-center mb-2">
         <p className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>{sessionName || 'Segment Timer'}</p>
       </div>

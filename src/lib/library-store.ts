@@ -6,17 +6,21 @@ interface LibraryState {
   savedTimers: SavedTimer[];
   recentTimers: SavedTimer[];
   hydrated: boolean;
+  pendingLoad: SavedTimer | null;
   hydrate: () => void;
   saveTimer: (timer: SavedTimer, isPremium: boolean) => boolean;
   deleteTimer: (id: string) => void;
   updateTimer: (timer: SavedTimer) => void;
   addRecent: (timer: SavedTimer) => void;
+  setPendingLoad: (timer: SavedTimer) => void;
+  clearPendingLoad: () => void;
 }
 
 export const useLibraryStore = create<LibraryState>((set, get) => ({
   savedTimers: [],
   recentTimers: [],
   hydrated: false,
+  pendingLoad: null,
 
   hydrate: () => {
     set({
@@ -53,5 +57,13 @@ export const useLibraryStore = create<LibraryState>((set, get) => ({
     const updated = [timer, ...filtered].slice(0, 5);
     set({ recentTimers: updated });
     storage.setRecentTimers(updated);
+  },
+
+  setPendingLoad: (timer: SavedTimer) => {
+    set({ pendingLoad: timer });
+  },
+
+  clearPendingLoad: () => {
+    set({ pendingLoad: null });
   },
 }));

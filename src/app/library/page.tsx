@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from 'next/navigation';
-import { Timer, Layers, Repeat, Trash2, Clock, BookmarkPlus, Crown, ChevronRight, Play } from 'lucide-react';
+import { Timer, Layers, Repeat, Trash2, Clock, BookmarkPlus, Crown, Play } from 'lucide-react';
 import { useLibraryStore } from '@/lib/library-store';
 import { useSettingsStore } from '@/lib/settings-store';
 import { useTimerStore } from '@/lib/timer-store';
@@ -34,13 +34,17 @@ export default function LibraryPage() {
   const timer = useTimerStore();
 
   const runTimer = (t: SavedTimer) => {
-    library.addRecent(t);
-    if (t.type === 'countdown' && t.durationSeconds) {
-      timer.setDuration(t.durationSeconds);
-      router.push('/');
+    if (t.type === 'countdown') {
+      library.addRecent(t);
+      if (t.durationSeconds) {
+        timer.setDuration(t.durationSeconds);
+        router.push('/');
+      }
     } else if (t.type === 'segments') {
+      library.setPendingLoad(t);
       router.push('/segments');
     } else if (t.type === 'intervals') {
+      library.setPendingLoad(t);
       router.push('/intervals');
     }
   };
