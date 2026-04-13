@@ -25,10 +25,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <ThemeProvider>
           <HydrationGate>
-            <main className="min-h-screen pb-20">
+            <Navigation />
+            <main className="min-h-screen pt-12">
               {children}
             </main>
-            <Navigation />
           </HydrationGate>
         </ThemeProvider>
       </body>
