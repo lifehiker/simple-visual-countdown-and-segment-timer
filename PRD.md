@@ -26,6 +26,7 @@ A solo professional such as a coach, teacher, facilitator, fitness instructor, o
   - Minimal UI with large timer text centered on screen.
   - High contrast dark theme by default.
   - Responsive layout for laptop and external display use.
+  - Slight shine throughout, grasping for and keeping the viewers attention. 
 
 - **Fullscreen mode**
   - One-click fullscreen toggle using browser Fullscreen API.
