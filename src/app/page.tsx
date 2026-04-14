@@ -38,6 +38,7 @@ export default function HomePage() {
     if (timer.status !== 'running') { if (tickRef.current) clearInterval(tickRef.current); return; }
     tickRef.current = setInterval(() => { timer.tick(); }, 100);
     return () => { if (tickRef.current) clearInterval(tickRef.current); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timer.status, timer.tick]);
 
   useEffect(() => {

@@ -70,6 +70,7 @@ export default function SegmentsPage() {
     }
     tickRef.current = setInterval(() => { timer.tick(); }, 100);
     return () => { if (tickRef.current) clearInterval(tickRef.current); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewMode, timer.status, timer.tick]);
 
   useEffect(() => {
