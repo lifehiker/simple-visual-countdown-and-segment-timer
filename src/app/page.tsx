@@ -100,65 +100,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-3rem)] px-8 select-none">
-
-      {/* Preset pills */}
-      <div className="flex items-center gap-2 mb-10 flex-wrap justify-center">
-        {TIMER_PRESETS.map((preset) => {
-          const active = timer.totalSeconds === preset.seconds && timer.status === 'idle';
-          return (
-            <button
-              key={preset.seconds}
-              onClick={() => applyPreset(preset.seconds)}
-              className="px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-150 hover:opacity-90"
-              style={{
-                background: active ? 'var(--accent)' : 'var(--bg-card)',
-                color: active ? 'white' : 'var(--text-secondary)',
-                border: '1px solid var(--border)',
-              }}
-            >
-              {preset.label}
-            </button>
-          );
-        })}
-        <button
-          onClick={() => setShowPicker(!showPicker)}
-          className="px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-150 hover:opacity-90"
-          style={{ background: showPicker ? 'var(--accent)' : 'var(--bg-card)', color: showPicker ? 'white' : 'var(--text-secondary)', border: '1px solid var(--border)' }}
-        >
-          Custom
-        </button>
-      </div>
-
-      {/* Custom duration picker */}
-      {showPicker && (
-        <div className="mb-10 p-6 rounded-2xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-          <div className="flex items-end gap-3 justify-center">
-            {[
-              { label: 'hr', value: pickerHours, max: 23, set: setPickerHours },
-              { label: 'min', value: pickerMinutes, max: 59, set: setPickerMinutes },
-              { label: 'sec', value: pickerSeconds, max: 59, set: setPickerSeconds },
-            ].map(({ label, value, max, set }, i) => (
-              <div key={label} className="flex items-end gap-3">
-                {i > 0 && <span className="text-3xl font-light mb-3" style={{ color: 'var(--border)' }}>:</span>}
-                <div className="flex flex-col items-center gap-1">
-                  <input
-                    type="number" min={0} max={max} value={value}
-                    onChange={(e) => set(Math.max(0, Math.min(max, parseInt(e.target.value) || 0)))}
-                    className="w-20 text-center py-2 text-3xl font-mono font-bold outline-none rounded-xl"
-                    style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}
-                  />
-                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{label}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="flex gap-2 mt-5">
-            <button onClick={() => setShowPicker(false)} className="flex-1 py-2.5 text-sm font-medium rounded-xl transition-all hover:opacity-80" style={{ background: 'var(--bg-secondary)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>Cancel</button>
-            <button onClick={applyPicker} disabled={pickerHours + pickerMinutes + pickerSeconds === 0} className="flex-1 py-2.5 text-sm font-semibold text-white rounded-xl transition-all hover:opacity-90 disabled:opacity-30" style={{ background: 'var(--accent)' }}>Set</button>
-          </div>
-        </div>
-      )}
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] px-8 select-none">
 
       {/* Big time display */}
       <div
@@ -198,6 +140,34 @@ export default function HomePage() {
             background: isCritical ? 'var(--critical)' : isWarning ? 'var(--warning)' : 'var(--accent)',
           }}
         />
+      </div>
+
+      {/* Preset pills — below progress bar */}
+      <div className="flex items-center gap-2 mt-5 flex-wrap justify-center">
+        {TIMER_PRESETS.map((preset) => {
+          const active = timer.totalSeconds === preset.seconds && timer.status === 'idle';
+          return (
+            <button
+              key={preset.seconds}
+              onClick={() => applyPreset(preset.seconds)}
+              className="px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-150 hover:opacity-90"
+              style={{
+                background: active ? 'var(--accent)' : 'var(--bg-card)',
+                color: active ? 'white' : 'var(--text-secondary)',
+                border: '1px solid var(--border)',
+              }}
+            >
+              {preset.label}
+            </button>
+          );
+        })}
+        <button
+          onClick={() => setShowPicker(!showPicker)}
+          className="px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-150 hover:opacity-90"
+          style={{ background: showPicker ? 'var(--accent)' : 'var(--bg-card)', color: showPicker ? 'white' : 'var(--text-secondary)', border: '1px solid var(--border)' }}
+        >
+          Custom
+        </button>
       </div>
 
       {/* Controls */}
@@ -287,6 +257,53 @@ export default function HomePage() {
           </div>
         </div>
       )}
+
+      {/* Custom duration picker — bottom sheet */}
+      {showPicker && (
+        <div
+          className="fixed inset-0 z-40"
+          style={{ background: 'rgba(0,0,0,0.5)' }}
+          onClick={() => setShowPicker(false)}
+        />
+      )}
+      <div
+        className="fixed left-0 right-0 z-50 transition-transform duration-300 ease-out"
+        style={{
+          bottom: '4rem',
+          transform: showPicker ? 'translateY(0)' : 'translateY(110%)',
+          background: 'var(--bg-card)',
+          borderTop: '1px solid var(--border)',
+          borderRadius: '1.25rem 1.25rem 0 0',
+          padding: '1.5rem',
+        }}
+      >
+        <div className="w-10 h-1 rounded-full mx-auto mb-5" style={{ background: 'var(--border)' }} />
+        <p className="text-sm font-semibold mb-5 text-center" style={{ color: 'var(--text-secondary)' }}>Custom duration</p>
+        <div className="flex items-end gap-3 justify-center">
+          {[
+            { label: 'hr', value: pickerHours, max: 23, set: setPickerHours },
+            { label: 'min', value: pickerMinutes, max: 59, set: setPickerMinutes },
+            { label: 'sec', value: pickerSeconds, max: 59, set: setPickerSeconds },
+          ].map(({ label, value, max, set }, i) => (
+            <div key={label} className="flex items-end gap-3">
+              {i > 0 && <span className="text-3xl font-light mb-3" style={{ color: 'var(--border)' }}>:</span>}
+              <div className="flex flex-col items-center gap-1">
+                <input
+                  type="number" min={0} max={max} value={value}
+                  onChange={(e) => set(Math.max(0, Math.min(max, parseInt(e.target.value) || 0)))}
+                  className="w-20 text-center py-2 text-3xl font-mono font-bold outline-none rounded-xl"
+                  style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}
+                />
+                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{label}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="flex gap-2 mt-5">
+          <button onClick={() => setShowPicker(false)} className="flex-1 py-2.5 text-sm font-medium rounded-xl transition-all hover:opacity-80" style={{ background: 'var(--bg-secondary)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>Cancel</button>
+          <button onClick={applyPicker} disabled={pickerHours + pickerMinutes + pickerSeconds === 0} className="flex-1 py-2.5 text-sm font-semibold text-white rounded-xl transition-all hover:opacity-90 disabled:opacity-30" style={{ background: 'var(--accent)' }}>Set</button>
+        </div>
+      </div>
     </div>
   );
 }

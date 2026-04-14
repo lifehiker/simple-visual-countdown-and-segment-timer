@@ -26,7 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider>
           <HydrationGate>
             <Navigation />
-            <main className="min-h-screen pt-12">
+            <main className="min-h-screen pb-16">
               {children}
             </main>
           </HydrationGate>
