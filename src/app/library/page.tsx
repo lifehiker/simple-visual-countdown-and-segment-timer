@@ -69,7 +69,7 @@ export default function LibraryPage() {
   );
 
   return (
-    <div className="mx-auto max-w-lg px-4 pt-6 pb-8 animate-fade-in">
+    <div className="mx-auto max-w-lg px-4 pt-6 pb-8">
       <div className="mb-6"><h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Library</h1></div>
 
       <div className="mb-6" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)' }}>
