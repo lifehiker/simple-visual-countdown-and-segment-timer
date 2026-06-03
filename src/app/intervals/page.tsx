@@ -158,7 +158,7 @@ export default function IntervalsPage() {
 
   if (viewMode === 'build') {
     return (
-      <div className="mx-auto max-w-lg px-4 pt-6 animate-fade-in">
+      <div className="mx-auto max-w-lg px-4 pt-6">
         <div className="mb-6"><h1 className="text-2xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>Interval Timer</h1><p className="text-sm" style={{ color: 'var(--text-muted)' }}>Build a work/rest interval session</p></div>
         <div className="mb-4"><input type="text" placeholder="Session name (optional)" value={config.sessionName} onChange={(e) => setConfig((c) => ({ ...c, sessionName: e.target.value }))} className="w-full px-4 py-3 text-sm font-medium outline-none" style={{ background: 'var(--bg-card)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }} /></div>
         <div className="space-y-3 mb-5">
@@ -201,7 +201,7 @@ export default function IntervalsPage() {
   const overallPct = totalRun > 0 ? (elapsed / totalRun) * 100 : 0;
 
   return (
-    <div className="mx-auto max-w-lg px-4 pt-6 animate-fade-in">
+    <div className="mx-auto max-w-lg px-4 pt-6">
       <div className="flex justify-end mb-2">
         <FullscreenButton />
       </div>
