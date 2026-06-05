@@ -208,7 +208,7 @@ export default function IntervalsPage() {
       <div className="text-center mb-2"><p className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>{runConfig.sessionName || 'Interval Timer'}</p></div>
       {!sessionComplete && (<div className="text-center mb-1"><span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>{phase === 'warmup' ? 'Warmup' : phase === 'cooldown' ? 'Cooldown' : 'Round ' + currentRound + ' of ' + runConfig.rounds}</span></div>)}
       <div className="text-center mb-5">
-        <span className="inline-block px-4 py-1 rounded-full text-sm font-bold tracking-widest animate-fade-in" key={phase + String(currentRound)} style={{ background: 'var(--bg-card)', color: phaseColor, border: '1px solid var(--border)' }}>{getPhaseLabel(phase)}</span>
+        <span className="inline-block px-4 py-1 rounded-full text-sm font-bold tracking-widest" key={phase + String(currentRound)} style={{ background: 'var(--bg-card)', color: phaseColor, border: '1px solid var(--border)' }}>{getPhaseLabel(phase)}</span>
       </div>
       <div className="flex flex-col items-center mb-6">
         <div className={"relative flex items-center justify-center transition-all duration-500 " + glowCls + (isPulsing ? ' animate-pulse-critical' : '')} style={{ width: 300, height: 300, borderRadius: '50%', background: 'var(--bg-card)' }}>
