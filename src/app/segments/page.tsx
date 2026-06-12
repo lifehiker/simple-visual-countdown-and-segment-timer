@@ -188,7 +188,7 @@ export default function SegmentsPage() {
   // ====== BUILD MODE ======
   if (viewMode === 'build') {
     return (
-      <div className="mx-auto max-w-lg px-4 pt-6 animate-fade-in">
+      <div className="mx-auto max-w-lg px-4 pt-6">
         <div className="mb-6">
           <h1 className="text-2xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>Segment Timer</h1>
           <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Build a sequence of timed segments</p>
@@ -209,7 +209,6 @@ export default function SegmentsPage() {
           {segments.map((segment, index) => (
             <div
               key={segment.id}
-              className="animate-fade-in"
               style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow)' }}
             >
               <div className="p-4">
@@ -310,7 +309,7 @@ export default function SegmentsPage() {
   const sessionComplete = timer.status === 'completed' && currentSegmentIndex >= segments.length - 1;
 
   return (
-    <div className="mx-auto max-w-lg px-4 pt-6 animate-fade-in">
+    <div className="mx-auto max-w-lg px-4 pt-6">
       <div className="flex justify-end mb-2">
         <FullscreenButton />
       </div>
@@ -326,7 +325,7 @@ export default function SegmentsPage() {
 
       <div className="text-center mb-6">
         <h2
-          className="text-xl font-bold animate-fade-in"
+          className="text-xl font-bold"
           style={{ color: sessionComplete ? 'var(--success)' : 'var(--text-primary)' }}
           key={currentSegmentIndex}
         >
