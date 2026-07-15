@@ -15,7 +15,7 @@
     "zustand": "^5.0.5",
     "lucide-react": "^0.510.0",
     "clsx": "^2.1.1",
-    "uuid": "^11.1.0"
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.15.2",
