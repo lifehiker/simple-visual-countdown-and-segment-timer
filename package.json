@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "next": "^15.3.1",
+    "next": "^15.5.27",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "zustand": "^5.0.5",
@@ -28,10 +28,13 @@
     "postcss": "^8.5.10",
     "@eslint/eslintrc": "^3.3.1",
     "eslint": "^9.25.1",
-    "eslint-config-next": "^15.3.1"
+    "eslint-config-next": "^15.5.27"
   },
   "overrides": {
     "postcss": "$postcss",
-    "sharp": "0.35.0"
+    "sharp": "^0.35.5",
+    "js-yaml": "^4.3.2",
+    "brace-expansion@5": "^5.0.12",
+    "brace-expansion@1": "^1.1.21"
   }
 }
